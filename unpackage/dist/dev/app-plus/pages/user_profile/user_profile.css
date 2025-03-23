@@ -1,0 +1,40 @@
+
+.user-accordion-page[data-v-f88c3c28] {
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+.page-title[data-v-f88c3c28] {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+.user-item[data-v-f88c3c28] {
+  background-color: #fff;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+.user-item[data-v-f88c3c28]:hover {
+  background-color: #e0e0e0;
+}
+.user-name[data-v-f88c3c28] {
+  font-size: 18px;
+  font-weight: bold;
+}
+.user-occupation[data-v-f88c3c28] {
+  color: #777;
+}
+.user-details[data-v-f88c3c28] {
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+.user-bio[data-v-f88c3c28],
+.user-contact[data-v-f88c3c28],
+.user-location[data-v-f88c3c28] {
+  color: #333;
+  margin-bottom: 8px;
+}
