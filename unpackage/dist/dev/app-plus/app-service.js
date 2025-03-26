@@ -776,23 +776,28 @@ if (uni.restoreGlobal) {
     setup() {
       const options = vue.ref(["AG187", "AG111", "AL02"]);
       const user_id = vue.ref("");
+      const user_location_list = vue.ref([]);
+      const selectedUserLocation = vue.ref("");
       const price = vue.ref("");
       const current_meter = vue.ref("");
       const last_reading = vue.ref(0);
       const showLastReading = vue.ref(false);
+      const loading = vue.ref(true);
       const errorMessages = vue.reactive({
         user_id: "",
+        user_location: "",
         price: "",
         current_meter: "",
         last_reading: ""
       });
-      const onPriceInputChange = (event) => {
-        price.value = event.target.value;
-        errorMessages.price = "";
-      };
-      const onSelectChange = (event) => {
+      const onSelect_user = (event) => {
         user_id.value = options.value[event.detail.value];
         errorMessages.user_id = "";
+      };
+      const onSelectChange = (event) => {
+        const selectedIndex = event.detail.value;
+        selectedUserLocation.value = user_location_list.value[selectedIndex].user_location;
+        errorMessages.user_location = "";
       };
       const onInputChange = (event) => {
         const { value, placeholder } = event.target;
@@ -814,14 +819,45 @@ if (uni.restoreGlobal) {
           errorMessages.last_reading = "";
         }
       };
-      const onSubmit = async () => {
+      const get_user_location = () => {
+        uni.request({
+          url: "http://192.168.16.31:4000/api/user_location",
+          method: "GET",
+          success(res) {
+            if (res.statusCode === 200) {
+              user_location_list.value = res.data;
+            } else {
+              formatAppLog("log", "at pages/index/index.vue:122", "Error response status:", res.statusCode);
+            }
+          },
+          fail(err) {
+            formatAppLog("error", "at pages/index/index.vue:126", "Request failed with error:", err);
+            uni.showToast({
+              title: "Network request failed. Please check your connection.",
+              icon: "none"
+            });
+          },
+          complete() {
+            loading.value = false;
+          }
+        });
+      };
+      const onSwitchChange = (event) => {
+        showLastReading.value = event.detail.value;
+      };
+      const validateForm = () => {
         let isValid = true;
         errorMessages.user_id = "";
+        errorMessages.user_location = "";
         errorMessages.price = "";
         errorMessages.current_meter = "";
         errorMessages.last_reading = "";
         if (!user_id.value) {
           errorMessages.user_id = "Please select an option.";
+          isValid = false;
+        }
+        if (!selectedUserLocation.value) {
+          errorMessages.user_location = "Please select an option.";
           isValid = false;
         }
         if (!price.value) {
@@ -836,13 +872,17 @@ if (uni.restoreGlobal) {
           errorMessages.last_reading = "Last reading is required.";
           isValid = false;
         }
-        if (isValid) {
+        return isValid;
+      };
+      const onSubmit = async () => {
+        if (validateForm()) {
           try {
             const response = await uni.request({
               url: "http://192.168.16.31:4000/api/eletricity_meter",
               method: "POST",
               data: {
                 user_id: user_id.value,
+                user_location: selectedUserLocation.value,
                 price: price.value,
                 current_meter: current_meter.value,
                 last_reading: last_reading.value
@@ -857,18 +897,18 @@ if (uni.restoreGlobal) {
                 url: "/pages/OverView/over_view"
               });
             } else {
-              formatAppLog("log", "at pages/index/index.vue:147", "Unexpected response status:", response.statusCode);
+              formatAppLog("log", "at pages/index/index.vue:203", "Unexpected response status:", response.statusCode);
               throw new Error(`Failed to submit. Status code: ${response.statusCode}`);
             }
           } catch (error) {
-            formatAppLog("error", "at pages/index/index.vue:151", "Error submitting form:", error);
+            formatAppLog("error", "at pages/index/index.vue:207", "Error submitting form:", error);
             uni.showToast({
               title: "Submission failed. Please try again.",
               icon: "none"
             });
           }
         } else {
-          formatAppLog("log", "at pages/index/index.vue:158", "Form contains errors.");
+          formatAppLog("log", "at pages/index/index.vue:214", "Form contains errors.");
         }
       };
       vue.watch(showLastReading, (newValue) => {
@@ -876,17 +916,24 @@ if (uni.restoreGlobal) {
           last_reading.value = 0;
         }
       });
+      vue.onMounted(() => {
+        get_user_location();
+      });
       return {
-        options,
         user_id,
+        options,
+        loading,
+        user_location_list,
+        selectedUserLocation,
         price,
         current_meter,
         last_reading,
         showLastReading,
         errorMessages,
+        onSelect_user,
         onSelectChange,
         onInputChange,
-        onPriceInputChange,
+        onSwitchChange,
         onSubmit
       };
     }
@@ -900,7 +947,7 @@ if (uni.restoreGlobal) {
         vue.createElementVNode("text", { class: "label" }, "Select user_id:"),
         vue.createElementVNode("picker", {
           range: $setup.options,
-          onChange: _cache[0] || (_cache[0] = (...args) => $setup.onSelectChange && $setup.onSelectChange(...args))
+          onChange: _cache[0] || (_cache[0] = (...args) => $setup.onSelect_user && $setup.onSelect_user(...args))
         }, [
           vue.createElementVNode("view", { class: "picker-box" }, [
             vue.createElementVNode(
@@ -925,6 +972,34 @@ if (uni.restoreGlobal) {
         )) : vue.createCommentVNode("v-if", true)
       ]),
       vue.createElementVNode("view", { class: "input-area" }, [
+        vue.createElementVNode("text", { class: "label" }, "Select user_location:"),
+        vue.createElementVNode("picker", {
+          range: $setup.user_location_list.map((location) => location.user_location),
+          onChange: _cache[1] || (_cache[1] = (...args) => $setup.onSelectChange && $setup.onSelectChange(...args))
+        }, [
+          vue.createElementVNode("view", { class: "picker-box" }, [
+            $setup.loading ? (vue.openBlock(), vue.createElementBlock("text", { key: 0 }, "Loading...")) : (vue.openBlock(), vue.createElementBlock(
+              "text",
+              { key: 1 },
+              vue.toDisplayString($setup.selectedUserLocation || "ရွေးချယ်ရန်"),
+              1
+              /* TEXT */
+            )),
+            vue.createElementVNode("view", { class: "arrow" })
+          ])
+        ], 40, ["range"]),
+        $setup.errorMessages.user_location ? (vue.openBlock(), vue.createElementBlock(
+          "text",
+          {
+            key: 0,
+            class: "error-message"
+          },
+          vue.toDisplayString($setup.errorMessages.user_location),
+          1
+          /* TEXT */
+        )) : vue.createCommentVNode("v-if", true)
+      ]),
+      vue.createElementVNode("view", { class: "input-area" }, [
         vue.createElementVNode("text", { class: "label" }, "Current Price:"),
         vue.withDirectives(vue.createElementVNode(
           "input",
@@ -932,7 +1007,7 @@ if (uni.restoreGlobal) {
             class: "input-box",
             type: "number",
             placeholder: "Enter price",
-            "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => $setup.price = $event)
+            "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => $setup.price = $event)
           },
           null,
           512
@@ -959,8 +1034,8 @@ if (uni.restoreGlobal) {
             class: "input-box",
             type: "number",
             placeholder: "Enter current meter",
-            onInput: _cache[2] || (_cache[2] = (...args) => $setup.onInputChange && $setup.onInputChange(...args)),
-            "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => $setup.current_meter = $event)
+            onInput: _cache[3] || (_cache[3] = (...args) => $setup.onInputChange && $setup.onInputChange(...args)),
+            "onUpdate:modelValue": _cache[4] || (_cache[4] = ($event) => $setup.current_meter = $event)
           },
           null,
           544
@@ -983,7 +1058,7 @@ if (uni.restoreGlobal) {
         vue.createElementVNode("text", { style: { "font-weight": "bold", "color": "#3a6ea5" } }, "မီး Meter စသုံးသူလာ ?"),
         vue.createElementVNode("switch", {
           checked: $setup.showLastReading,
-          onChange: _cache[4] || (_cache[4] = ($event) => $setup.showLastReading = $event.detail.value)
+          onChange: _cache[5] || (_cache[5] = (...args) => $setup.onSwitchChange && $setup.onSwitchChange(...args))
         }, null, 40, ["checked"])
       ]),
       $setup.showLastReading ? (vue.openBlock(), vue.createElementBlock("view", {
@@ -997,8 +1072,8 @@ if (uni.restoreGlobal) {
             class: "input-box",
             type: "number",
             placeholder: "Enter last reading",
-            onInput: _cache[5] || (_cache[5] = (...args) => $setup.onInputChange && $setup.onInputChange(...args)),
-            "onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => $setup.last_reading = $event)
+            onInput: _cache[6] || (_cache[6] = (...args) => $setup.onInputChange && $setup.onInputChange(...args)),
+            "onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => $setup.last_reading = $event)
           },
           null,
           544
@@ -1020,7 +1095,7 @@ if (uni.restoreGlobal) {
       vue.createElementVNode("view", { class: "button-area" }, [
         vue.createElementVNode("button", {
           class: "submit-btn",
-          onClick: _cache[7] || (_cache[7] = (...args) => $setup.onSubmit && $setup.onSubmit(...args))
+          onClick: _cache[8] || (_cache[8] = (...args) => $setup.onSubmit && $setup.onSubmit(...args))
         }, "Submit")
       ])
     ]);
