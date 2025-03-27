@@ -55,8 +55,8 @@ const validatePassword = (password) => {
 };
 
 const login = () => {
-  errorMessage.value = '';
-  
+  errorMessage.value = ''; 
+
   const usernameError = validateUsername(username.value);
   const passwordError = validatePassword(password.value);
 
@@ -66,45 +66,56 @@ const login = () => {
   }
 
   uni.showToast({
-    title: 'အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!',
-    icon: 'success',
+    title: 'ဝင်ရောက်ရန် ကြိုးစားနေပါသည်...',
+    icon: 'loading',
   });
 
   uni.request({
-    url: '',
+    url: 'http://192.168.16.31:4000/api/user_login',
     method: 'POST',
     data: {
       username: username.value,
       password: password.value,
     },
     success(res) {
-      if (res.data.token) {
-        uni.setStorageSync('token', res.data.token);
-        uni.navigateTo({
-          url: '/pages/index/index',
-        });
+      if (res.statusCode === 200 && res.data.msg === 'Login successful') {
+		  uni.navigateTo({
+			url: '/pages/OverView/over_view',
+		  });
+		  console.log(res.statusCode);
+		if (res.data.token) {
+		  uni.setStorageSync('token', res.data.token);
+		  uni.showToast({
+			title: 'အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!',
+			icon: 'success',
+		  });
+		  uni.navigateTo({
+			url: '/pages/OverView/over_view',
+		  });
+		}
       } else {
         uni.showToast({
-          title: 'Login ဝင်ရောက်မှုမအောင်မြင်ပါ', icon: 'none',
+          title: res.data.msg || 'Login ဝင်ရောက်မှုမအောင်မြင်ပါ',
+          icon: 'none',
         });
       }
     },
     fail() {
       uni.showToast({
-        title: 'Network error', icon: 'none',
+        title: 'Network error, please try again.',
+        icon: 'none',
       });
     },
   });
 };
 </script>
 
-
 <style scoped>
 .container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; 
+  height: 100vh;
 }
 
 .form-container {
@@ -113,8 +124,7 @@ const login = () => {
   background-color: rgba(255, 255, 255, 0.9);
   padding: 30px;
   border-radius: 15px;
-  /* box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); */
-  backdrop-filter: blur(10px); 
+  backdrop-filter: blur(10px);
 }
 
 .input-field {
@@ -138,7 +148,6 @@ const login = () => {
 .input:hover {
   color: #007aff;
   border-color: #007aff;
-  /* border-image: linear-gradient(to right, #007aff, #66a6ff, #007aff) 1; */
 }
 
 .button-container {
@@ -150,7 +159,6 @@ const login = () => {
   padding: 15px;
   border-radius: 10px;
   background: linear-gradient(to right, #007aff, #66a6ff, #007aff);
-  /* background: linear-gradient(to right, #007aff, #66a6ff); */
   color: #fff;
   font-size: 18px;
   border: none;
@@ -160,17 +168,14 @@ const login = () => {
 }
 
 .login-button:hover {
-  transform: translateY(-3px); 
+  transform: translateY(-3px);
   box-shadow: 0 5px 10px rgba(0, 122, 255, 0.5);
 }
 
 .error-message {
   color: red;
-  /* margin-top: 10px; */
   margin-left: 5px;
   margin-bottom: 10px;
   font-size: 14px;
-  
 }
-
 </style>

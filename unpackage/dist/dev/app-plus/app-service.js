@@ -45,6 +45,141 @@ if (uni.restoreGlobal) {
     }
     return target;
   };
+  const _sfc_main$b = {
+    __name: "login",
+    setup(__props, { expose: __expose }) {
+      __expose();
+      const username = vue.ref("");
+      const password = vue.ref("");
+      const errorMessage = vue.ref("");
+      const validateUsername = (username2) => {
+        if (!username2.trim()) {
+          return "အသုံးပြုသူအမည်ကို ဖြည့်ပါ!";
+        }
+        if (/\s/.test(username2)) {
+          return "အသုံးပြုသူအမည်တွင် ကွာဟချက် မရှိသင့်ပါ!";
+        }
+        return "";
+      };
+      const validatePassword = (password2) => {
+        if (!password2.trim()) {
+          return "လျှို့ဝှက်နံပါတ်ကို ဖြည့်ပါ!";
+        }
+        if (password2.length < 6) {
+          return "လျှို့ဝှက်နံပါတ်အနည်းဆုံး 6 လုံးဖြစ်ရမည်!";
+        }
+        return "";
+      };
+      const login = () => {
+        errorMessage.value = "";
+        const usernameError = validateUsername(username.value);
+        const passwordError = validatePassword(password.value);
+        if (usernameError || passwordError) {
+          errorMessage.value = usernameError || passwordError;
+          return;
+        }
+        uni.showToast({
+          title: "ဝင်ရောက်ရန် ကြိုးစားနေပါသည်...",
+          icon: "loading"
+        });
+        uni.request({
+          url: "http://192.168.16.31:4000/api/user_login",
+          method: "POST",
+          data: {
+            username: username.value,
+            password: password.value
+          },
+          success(res) {
+            if (res.statusCode === 200 && res.data.msg === "Login successful") {
+              uni.navigateTo({
+                url: "/pages/OverView/over_view"
+              });
+              formatAppLog("log", "at pages/loginPage/login.vue:85", res.statusCode);
+              if (res.data.token) {
+                uni.setStorageSync("token", res.data.token);
+                uni.showToast({
+                  title: "အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!",
+                  icon: "success"
+                });
+                uni.navigateTo({
+                  url: "/pages/OverView/over_view"
+                });
+              }
+            } else {
+              uni.showToast({
+                title: res.data.msg || "Login ဝင်ရောက်မှုမအောင်မြင်ပါ",
+                icon: "none"
+              });
+            }
+          },
+          fail() {
+            uni.showToast({
+              title: "Network error, please try again.",
+              icon: "none"
+            });
+          }
+        });
+      };
+      const __returned__ = { username, password, errorMessage, validateUsername, validatePassword, login, ref: vue.ref };
+      Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+      return __returned__;
+    }
+  };
+  function _sfc_render$a(_ctx, _cache, $props, $setup, $data, $options) {
+    return vue.openBlock(), vue.createElementBlock("view", { class: "container" }, [
+      vue.createElementVNode("view", { class: "form-container" }, [
+        vue.createElementVNode("view", { class: "input-field" }, [
+          vue.withDirectives(vue.createElementVNode(
+            "input",
+            {
+              type: "text",
+              "onUpdate:modelValue": _cache[0] || (_cache[0] = ($event) => $setup.username = $event),
+              placeholder: "အသုံးပြုသူအမည်",
+              class: "input"
+            },
+            null,
+            512
+            /* NEED_PATCH */
+          ), [
+            [vue.vModelText, $setup.username]
+          ])
+        ]),
+        vue.createElementVNode("view", { class: "input-field" }, [
+          vue.withDirectives(vue.createElementVNode(
+            "input",
+            {
+              type: "password",
+              "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => $setup.password = $event),
+              placeholder: "လျှို့ဝှက်နံပါတ်",
+              class: "input"
+            },
+            null,
+            512
+            /* NEED_PATCH */
+          ), [
+            [vue.vModelText, $setup.password]
+          ])
+        ]),
+        $setup.errorMessage ? (vue.openBlock(), vue.createElementBlock(
+          "view",
+          {
+            key: 0,
+            class: "error-message"
+          },
+          vue.toDisplayString($setup.errorMessage),
+          1
+          /* TEXT */
+        )) : vue.createCommentVNode("v-if", true),
+        vue.createElementVNode("view", { class: "button-container" }, [
+          vue.createElementVNode("button", {
+            onClick: $setup.login,
+            class: "login-button"
+          }, "ဝင်ရောက်ရန်")
+        ])
+      ])
+    ]);
+  }
+  const PagesLoginPageLogin = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["render", _sfc_render$a], ["__scopeId", "data-v-f60a0104"], ["__file", "C:/Users/shwethe/Desktop/Hbuilder/Electricity_meter/pages/loginPage/login.vue"]]);
   const _sfc_main$a = {
     __name: "user_detail",
     setup(__props, { expose: __expose }) {
@@ -796,7 +931,7 @@ if (uni.restoreGlobal) {
       };
       const onSelectChange = (event) => {
         const selectedIndex = event.detail.value;
-        selectedUserLocation.value = user_location_list.value[selectedIndex].user_location;
+        selectedUserLocation.value = user_location_list.value[selectedIndex].user_location_id;
         errorMessages.user_location = "";
       };
       const onInputChange = (event) => {
@@ -1411,6 +1546,7 @@ if (uni.restoreGlobal) {
     ]);
   }
   const PagesUserProfileUserProfile = /* @__PURE__ */ _export_sfc(_sfc_main$1, [["render", _sfc_render], ["__scopeId", "data-v-f88c3c28"], ["__file", "C:/Users/shwethe/Desktop/Hbuilder/Electricity_meter/pages/user_profile/user_profile.vue"]]);
+  __definePage("pages/loginPage/login", PagesLoginPageLogin);
   __definePage("pages/OverView/over_view", PagesOverViewOverView);
   __definePage("pages/HomeFile/home", PagesHomeFileHome);
   __definePage("pages/index/index", PagesIndexIndex);
