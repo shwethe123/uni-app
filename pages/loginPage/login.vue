@@ -1,6 +1,7 @@
 <template>
   <view class="container">
-    <view class="form-container">
+    <view v-if="show_login" class="form-container">
+      <h3 style="text-align: center; margin-bottom: 35px;">Login Form</h3>
       <view class="input-field">
         <input
           type="text"
@@ -24,14 +25,49 @@
         <button @click="login" class="login-button">ဝင်ရောက်ရန်</button>
       </view>
     </view>
+
+    <view v-else class="form-container">
+      <h3 style="text-align: center; margin-bottom: 35px;">Register Form</h3>
+      <view class="input-field">
+        <input
+          type="text"
+          v-model="newUsername"
+          placeholder="အသုံးပြုမည့်သူအမည်"
+          class="input"
+        />
+      </view>
+      <view class="input-field">
+        <input
+          type="password"
+          v-model="newPassword"
+          placeholder="လျှို့ဝှက်နံပါတ်"
+          class="input"
+        />
+      </view>
+      <view v-if="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </view>
+      <view class="button-container">
+        <button @click="register" class="login-button">အကောင့်သစ်ဖွင့်ရန်</button>
+      </view>
+    </view>
+    <span @click="show_login = !show_login" style="font-size: 12px;">
+      {{ show_login ? 'No account yet?' : 'Already have an account?' }}
+      <span style="font-weight: bold; text-decoration: underline;">
+        {{ show_login ? 'create account' : 'Login account' }}
+      </span>
+    </span>
   </view>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+const show_login = ref(true);
 
 const username = ref('');
 const password = ref('');
+const newUsername = ref('');
+const newPassword = ref('');
 const errorMessage = ref('');
 
 const validateUsername = (username) => {
@@ -55,7 +91,7 @@ const validatePassword = (password) => {
 };
 
 const login = () => {
-  errorMessage.value = ''; 
+  errorMessage.value = '';
 
   const usernameError = validateUsername(username.value);
   const passwordError = validatePassword(password.value);
@@ -77,22 +113,20 @@ const login = () => {
       username: username.value,
       password: password.value,
     },
+    withCredentials: true,
     success(res) {
       if (res.statusCode === 200 && res.data.msg === 'Login successful') {
-		  uni.navigateTo({
-			url: '/pages/OverView/over_view',
-		  });
-		  console.log(res.statusCode);
-		if (res.data.token) {
-		  uni.setStorageSync('token', res.data.token);
-		  uni.showToast({
-			title: 'အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!',
-			icon: 'success',
-		  });
-		  uni.navigateTo({
-			url: '/pages/OverView/over_view',
-		  });
-		}
+		  console.log('my token',res.data.token);
+        if (res.data.token) {
+          uni.setStorageSync('my_token', res.data.token);
+          uni.showToast({
+            title: 'အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!',
+            icon: 'success',
+          });
+          uni.reLaunch({ 
+            url: '/pages/OverView/over_view',
+          });
+        }
       } else {
         uni.showToast({
           title: res.data.msg || 'Login ဝင်ရောက်မှုမအောင်မြင်ပါ',
@@ -108,11 +142,73 @@ const login = () => {
     },
   });
 };
+
+
+const register = () => {
+  errorMessage.value = '';
+
+  const usernameError = validateUsername(newUsername.value);
+  const passwordError = validatePassword(newPassword.value);
+
+  if (usernameError || passwordError) {
+    errorMessage.value = usernameError || passwordError;
+    return;
+  }
+
+  uni.showToast({
+    title: 'အကောင့်သစ်ဖွင့်ရန် ကြိုးစားနေပါသည်...',
+    icon: 'loading',
+  });
+
+  uni.request({
+    url: 'http://192.168.16.31:4000/api/user_register',
+    method: 'POST',
+    data: {
+      username: newUsername.value,
+      password: newPassword.value,
+    },
+	    withCredentials: true,
+    success(res) {
+      if (res.statusCode === 201 && res.data.msg === 'User created successfully') {
+        uni.showToast({
+          title: 'အကောင့်သစ်အောင်မြင်စွာဖွင့်နိုင်ပါပြီ!',
+          icon: 'success',
+        });
+		uni.reLaunch({
+		  url: '/pages/OverView/over_view',
+		});
+        show_login.value = true;
+      } else {
+        uni.showToast({
+          title: res.data.msg || 'အကောင့်သစ်ဖွင့်ရန် မအောင်မြင်ပါ',
+          icon: 'none',
+        });
+      }
+    },
+    fail() {
+      uni.showToast({
+        title: 'Network error, please try again.',
+        icon: 'none',
+      });
+    },
+  });
+};
+
+onMounted(() => {
+  const token = uni.getStorageSync('token');
+  if (token) {
+    show_login.value = false;
+    uni.reLaunch({
+      url: '/pages/OverView/over_view',
+    });
+  }
+});
 </script>
 
 <style scoped>
 .container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
@@ -156,7 +252,7 @@ const login = () => {
 
 .login-button {
   width: 100%;
-  padding: 15px;
+  padding: 10px;
   border-radius: 10px;
   background: linear-gradient(to right, #007aff, #66a6ff, #007aff);
   color: #fff;

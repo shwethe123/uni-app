@@ -39,7 +39,7 @@ const addItem = () => {
   font-size: 30px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .fab:hover {

@@ -196,7 +196,7 @@ const get_user_location = () => {
               title: 'Form submitted successfully!',
               icon: 'success',
             });
-            uni.navigateTo({
+            uni.reLaunch({
               url: '/pages/OverView/over_view',
             });
           } else {

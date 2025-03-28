@@ -65,7 +65,7 @@ onMounted(() => {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  padding: 20px;
+  padding: 15px;
   transition: transform 0.3s ease-in-out;
   position: relative;
 }

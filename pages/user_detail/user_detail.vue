@@ -15,7 +15,6 @@
 
     <view class="card">
       <view class="card-header">
-        <!-- Add icon for Total Price -->
         <i class="fa fa-dollar-sign card-icon"></i>
         <text class="card-title">Total Price</text>
       </view>
@@ -40,7 +39,6 @@
    </view>
  </view>
 
-    <!-- Other Data Cards -->
     <view class="card" v-for="(item, index) in Data" :key="index">
       <view class="card-header">
         <i :class="item.icon" class="card-icon"></i>
@@ -60,7 +58,6 @@
 import { onMounted, ref } from 'vue'
 
 const Data = ref([
-  // { title: 'Total User', value: 65, icon: 'fa fa-users', details: 'Total number of Users in stock' },
   { title: 'Customer Rating', value: '4.7/5', icon: 'fa fa-star', details: 'Customer feedback rating on products' }
 ]);
 
@@ -69,7 +66,6 @@ const total_meter = ref(0);
 const total_user = ref(0);
 const total_price = ref(0);
 
-// Fetch data from the API when component is mounted
 onMounted(() => {
   const apiUrl = 'http://192.168.16.31:4000/api/eletricity_meter'; 
   
@@ -82,42 +78,33 @@ onMounted(() => {
         
         console.log(dashboardData);
 
-        // Initialize the total variables
-        let userCount = new Set(); // Use a Set to count unique users
-        let priceTotal = 0;        // Total price
-        let meterTotal = 0;        // Total meter count
+        let userCount = new Set();
+        let priceTotal = 0;   
+        let meterTotal = 0;   
 
-        // Loop through the fetched data and calculate totals
         dashboardData.value.forEach((item) => {
-          // Adding user_id to Set to count unique users
           userCount.add(item);  
 
-          // Calculate the total price
           let price = 0;
           if (typeof item.edit_price === 'string') {
-            // Remove currency symbol and commas, then parse as a number
             price = parseFloat(item.edit_price.replace('฿', '').replace(',', ''));  
           } else if (typeof item.edit_price === 'number') {
-            // If it's already a number, we can directly use it
             price = item.edit_price;
           }
 
-          // Add price to total if it's valid
           if (!isNaN(price)) {
-            priceTotal += price;  // Adding to total price
+            priceTotal += price;
           } else {
             console.error("Invalid price value:", item.edit_price);
           }
 
-          // Calculate total meters (sum up total_meter values)
-          let meter = parseInt(item.total_meter) || 0;  // Make sure it's a valid number
+          let meter = parseInt(item.total_meter) || 0;
           meterTotal += meter;
         });
 
-        // Set the calculated values to the ref variables
-        total_user.value = userCount.size;  // Get the total number of unique users
-        total_price.value = priceTotal.toFixed(2);  // Set the total price with two decimal places
-        total_meter.value = meterTotal;  // Set the total meter count
+        total_user.value = userCount.size;
+        total_price.value = priceTotal.toFixed(2);  
+        total_meter.value = meterTotal;
 
       } else {
         console.error('Failed to load data', response);
@@ -145,7 +132,7 @@ onMounted(() => {
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 20px;
+  padding: 15px;
   transition: transform 0.3s ease;
   position: relative;
 }

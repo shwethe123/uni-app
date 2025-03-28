@@ -3,13 +3,13 @@
 		{
 			"path": "pages/loginPage/login",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "Electricity meter"
 			}
 		},
 		{
 			"path": "pages/OverView/over_view",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "Over view"
 			}
 		},
 		{
@@ -21,19 +21,19 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "Create Page"
 			}
 		},
 		{
 			"path": "pages/userFile/user_file",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "View all user"
 			}
 		},
 		{
 			"path": "pages/user_detail/user_detail",
 			"style": {
-				"navigationBarTitleText": "uni-app"
+				"navigationBarTitleText": "View all user"
 			}
 		},
 		{
@@ -45,7 +45,7 @@
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
+		// "navigationBarTitleText": "uni-app",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},

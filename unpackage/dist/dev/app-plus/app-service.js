@@ -49,8 +49,11 @@ if (uni.restoreGlobal) {
     __name: "login",
     setup(__props, { expose: __expose }) {
       __expose();
+      const show_login = vue.ref(true);
       const username = vue.ref("");
       const password = vue.ref("");
+      const newUsername = vue.ref("");
+      const newPassword = vue.ref("");
       const errorMessage = vue.ref("");
       const validateUsername = (username2) => {
         if (!username2.trim()) {
@@ -89,19 +92,17 @@ if (uni.restoreGlobal) {
             username: username.value,
             password: password.value
           },
+          withCredentials: true,
           success(res) {
             if (res.statusCode === 200 && res.data.msg === "Login successful") {
-              uni.navigateTo({
-                url: "/pages/OverView/over_view"
-              });
-              formatAppLog("log", "at pages/loginPage/login.vue:85", res.statusCode);
+              formatAppLog("log", "at pages/loginPage/login.vue:119", "my token", res.data.token);
               if (res.data.token) {
-                uni.setStorageSync("token", res.data.token);
+                uni.setStorageSync("my_token", res.data.token);
                 uni.showToast({
                   title: "အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!",
                   icon: "success"
                 });
-                uni.navigateTo({
+                uni.reLaunch({
                   url: "/pages/OverView/over_view"
                 });
               }
@@ -120,14 +121,72 @@ if (uni.restoreGlobal) {
           }
         });
       };
-      const __returned__ = { username, password, errorMessage, validateUsername, validatePassword, login, ref: vue.ref };
+      const register = () => {
+        errorMessage.value = "";
+        const usernameError = validateUsername(newUsername.value);
+        const passwordError = validatePassword(newPassword.value);
+        if (usernameError || passwordError) {
+          errorMessage.value = usernameError || passwordError;
+          return;
+        }
+        uni.showToast({
+          title: "အကောင့်သစ်ဖွင့်ရန် ကြိုးစားနေပါသည်...",
+          icon: "loading"
+        });
+        uni.request({
+          url: "http://192.168.16.31:4000/api/user_register",
+          method: "POST",
+          data: {
+            username: newUsername.value,
+            password: newPassword.value
+          },
+          withCredentials: true,
+          success(res) {
+            if (res.statusCode === 201 && res.data.msg === "User created successfully") {
+              uni.showToast({
+                title: "အကောင့်သစ်အောင်မြင်စွာဖွင့်နိုင်ပါပြီ!",
+                icon: "success"
+              });
+              uni.reLaunch({
+                url: "/pages/OverView/over_view"
+              });
+              show_login.value = true;
+            } else {
+              uni.showToast({
+                title: res.data.msg || "အကောင့်သစ်ဖွင့်ရန် မအောင်မြင်ပါ",
+                icon: "none"
+              });
+            }
+          },
+          fail() {
+            uni.showToast({
+              title: "Network error, please try again.",
+              icon: "none"
+            });
+          }
+        });
+      };
+      vue.onMounted(() => {
+        const token = uni.getStorageSync("token");
+        if (token) {
+          show_login.value = false;
+          uni.reLaunch({
+            url: "/pages/OverView/over_view"
+          });
+        }
+      });
+      const __returned__ = { show_login, username, password, newUsername, newPassword, errorMessage, validateUsername, validatePassword, login, register, onMounted: vue.onMounted, ref: vue.ref };
       Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
       return __returned__;
     }
   };
   function _sfc_render$a(_ctx, _cache, $props, $setup, $data, $options) {
     return vue.openBlock(), vue.createElementBlock("view", { class: "container" }, [
-      vue.createElementVNode("view", { class: "form-container" }, [
+      $setup.show_login ? (vue.openBlock(), vue.createElementBlock("view", {
+        key: 0,
+        class: "form-container"
+      }, [
+        vue.createElementVNode("h3", { style: { "text-align": "center", "margin-bottom": "35px" } }, "Login Form"),
         vue.createElementVNode("view", { class: "input-field" }, [
           vue.withDirectives(vue.createElementVNode(
             "input",
@@ -176,6 +235,76 @@ if (uni.restoreGlobal) {
             class: "login-button"
           }, "ဝင်ရောက်ရန်")
         ])
+      ])) : (vue.openBlock(), vue.createElementBlock("view", {
+        key: 1,
+        class: "form-container"
+      }, [
+        vue.createElementVNode("h3", { style: { "text-align": "center", "margin-bottom": "35px" } }, "Register Form"),
+        vue.createElementVNode("view", { class: "input-field" }, [
+          vue.withDirectives(vue.createElementVNode(
+            "input",
+            {
+              type: "text",
+              "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => $setup.newUsername = $event),
+              placeholder: "အသုံးပြုမည့်သူအမည်",
+              class: "input"
+            },
+            null,
+            512
+            /* NEED_PATCH */
+          ), [
+            [vue.vModelText, $setup.newUsername]
+          ])
+        ]),
+        vue.createElementVNode("view", { class: "input-field" }, [
+          vue.withDirectives(vue.createElementVNode(
+            "input",
+            {
+              type: "password",
+              "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => $setup.newPassword = $event),
+              placeholder: "လျှို့ဝှက်နံပါတ်",
+              class: "input"
+            },
+            null,
+            512
+            /* NEED_PATCH */
+          ), [
+            [vue.vModelText, $setup.newPassword]
+          ])
+        ]),
+        $setup.errorMessage ? (vue.openBlock(), vue.createElementBlock(
+          "view",
+          {
+            key: 0,
+            class: "error-message"
+          },
+          vue.toDisplayString($setup.errorMessage),
+          1
+          /* TEXT */
+        )) : vue.createCommentVNode("v-if", true),
+        vue.createElementVNode("view", { class: "button-container" }, [
+          vue.createElementVNode("button", {
+            onClick: $setup.register,
+            class: "login-button"
+          }, "အကောင့်သစ်ဖွင့်ရန်")
+        ])
+      ])),
+      vue.createElementVNode("span", {
+        onClick: _cache[4] || (_cache[4] = ($event) => $setup.show_login = !$setup.show_login),
+        style: { "font-size": "12px" }
+      }, [
+        vue.createTextVNode(
+          vue.toDisplayString($setup.show_login ? "No account yet?" : "Already have an account?") + " ",
+          1
+          /* TEXT */
+        ),
+        vue.createElementVNode(
+          "span",
+          { style: { "font-weight": "bold", "text-decoration": "underline" } },
+          vue.toDisplayString($setup.show_login ? "create account" : "Login account"),
+          1
+          /* TEXT */
+        )
       ])
     ]);
   }
@@ -185,7 +314,6 @@ if (uni.restoreGlobal) {
     setup(__props, { expose: __expose }) {
       __expose();
       const Data = vue.ref([
-        // { title: 'Total User', value: 65, icon: 'fa fa-users', details: 'Total number of Users in stock' },
         { title: "Customer Rating", value: "4.7/5", icon: "fa fa-star", details: "Customer feedback rating on products" }
       ]);
       const dashboardData = vue.ref([]);
@@ -200,7 +328,7 @@ if (uni.restoreGlobal) {
           success: (response) => {
             if (response.statusCode === 200) {
               dashboardData.value = response.data;
-              formatAppLog("log", "at pages/user_detail/user_detail.vue:83", dashboardData);
+              formatAppLog("log", "at pages/user_detail/user_detail.vue:79", dashboardData);
               let userCount = /* @__PURE__ */ new Set();
               let priceTotal = 0;
               let meterTotal = 0;
@@ -215,7 +343,7 @@ if (uni.restoreGlobal) {
                 if (!isNaN(price)) {
                   priceTotal += price;
                 } else {
-                  formatAppLog("error", "at pages/user_detail/user_detail.vue:109", "Invalid price value:", item.edit_price);
+                  formatAppLog("error", "at pages/user_detail/user_detail.vue:98", "Invalid price value:", item.edit_price);
                 }
                 let meter = parseInt(item.total_meter) || 0;
                 meterTotal += meter;
@@ -224,11 +352,11 @@ if (uni.restoreGlobal) {
               total_price.value = priceTotal.toFixed(2);
               total_meter.value = meterTotal;
             } else {
-              formatAppLog("error", "at pages/user_detail/user_detail.vue:123", "Failed to load data", response);
+              formatAppLog("error", "at pages/user_detail/user_detail.vue:110", "Failed to load data", response);
             }
           },
           fail: (error) => {
-            formatAppLog("error", "at pages/user_detail/user_detail.vue:127", "API request failed", error);
+            formatAppLog("error", "at pages/user_detail/user_detail.vue:114", "API request failed", error);
           }
         });
       });
@@ -259,7 +387,6 @@ if (uni.restoreGlobal) {
       ]),
       vue.createElementVNode("view", { class: "card" }, [
         vue.createElementVNode("view", { class: "card-header" }, [
-          vue.createCommentVNode(" Add icon for Total Price "),
           vue.createElementVNode("i", { class: "fa fa-dollar-sign card-icon" }),
           vue.createElementVNode("text", { class: "card-title" }, "Total Price")
         ]),
@@ -294,7 +421,6 @@ if (uni.restoreGlobal) {
           vue.createElementVNode("text", { class: "card-detail" }, "Total number of Users in stock")
         ])
       ]),
-      vue.createCommentVNode(" Other Data Cards "),
       (vue.openBlock(true), vue.createElementBlock(
         vue.Fragment,
         null,
@@ -1028,7 +1154,7 @@ if (uni.restoreGlobal) {
                 title: "Form submitted successfully!",
                 icon: "success"
               });
-              uni.navigateTo({
+              uni.reLaunch({
                 url: "/pages/OverView/over_view"
               });
             } else {
