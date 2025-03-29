@@ -116,13 +116,14 @@ export default {
   font-family: 'Arial', sans-serif;
   padding-bottom: 60px;
   position: relative;
-  /* min-height: 100vh; */
+  min-height: 90vh;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
   padding: 15px 20px;
   background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

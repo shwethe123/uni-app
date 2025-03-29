@@ -97,7 +97,7 @@ if (uni.restoreGlobal) {
             if (res.statusCode === 200 && res.data.msg === "Login successful") {
               formatAppLog("log", "at pages/loginPage/login.vue:119", "my token", res.data.token);
               if (res.data.token) {
-                uni.setStorageSync("my_token", res.data.token);
+                uni.setStorageSync("token", res.data.token);
                 uni.showToast({
                   title: "အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!",
                   icon: "success"
@@ -143,14 +143,17 @@ if (uni.restoreGlobal) {
           withCredentials: true,
           success(res) {
             if (res.statusCode === 201 && res.data.msg === "User created successfully") {
-              uni.showToast({
-                title: "အကောင့်သစ်အောင်မြင်စွာဖွင့်နိုင်ပါပြီ!",
-                icon: "success"
-              });
-              uni.reLaunch({
-                url: "/pages/OverView/over_view"
-              });
-              show_login.value = true;
+              if (res.data.token) {
+                uni.setStorageSync("token", res.data.token);
+                uni.showToast({
+                  title: "အကောင့်သစ်အောင်မြင်စွာဖွင့်နိုင်ပါပြီ!",
+                  icon: "success"
+                });
+                uni.reLaunch({
+                  url: "/pages/OverView/over_view"
+                });
+                show_login.value = true;
+              }
             } else {
               uni.showToast({
                 title: res.data.msg || "အကောင့်သစ်ဖွင့်ရန် မအောင်မြင်ပါ",
@@ -173,6 +176,8 @@ if (uni.restoreGlobal) {
           uni.reLaunch({
             url: "/pages/OverView/over_view"
           });
+        } else {
+          formatAppLog("log", "at pages/loginPage/login.vue:208", "token keep failed");
         }
       });
       const __returned__ = { show_login, username, password, newUsername, newPassword, errorMessage, validateUsername, validatePassword, login, register, onMounted: vue.onMounted, ref: vue.ref };
@@ -294,14 +299,14 @@ if (uni.restoreGlobal) {
         style: { "font-size": "12px" }
       }, [
         vue.createTextVNode(
-          vue.toDisplayString($setup.show_login ? "No account yet?" : "Already have an account?") + " ",
+          vue.toDisplayString($setup.show_login ? "Don't have an account?" : "Already have an account?") + " ",
           1
           /* TEXT */
         ),
         vue.createElementVNode(
           "span",
           { style: { "font-weight": "bold", "text-decoration": "underline" } },
-          vue.toDisplayString($setup.show_login ? "create account" : "Login account"),
+          vue.toDisplayString($setup.show_login ? "Sign up" : "Login account"),
           1
           /* TEXT */
         )
@@ -309,6 +314,57 @@ if (uni.restoreGlobal) {
     ]);
   }
   const PagesLoginPageLogin = /* @__PURE__ */ _export_sfc(_sfc_main$b, [["render", _sfc_render$a], ["__scopeId", "data-v-f60a0104"], ["__file", "C:/Users/shwethe/Desktop/Hbuilder/Electricity_meter/pages/loginPage/login.vue"]]);
+  function e(e2) {
+    this.message = e2;
+  }
+  e.prototype = new Error(), e.prototype.name = "InvalidCharacterError";
+  var r = "undefined" != typeof window && window.atob && window.atob.bind(window) || function(r2) {
+    var t2 = String(r2).replace(/=+$/, "");
+    if (t2.length % 4 == 1)
+      throw new e("'atob' failed: The string to be decoded is not correctly encoded.");
+    for (var n2, o2, a = 0, i = 0, c = ""; o2 = t2.charAt(i++); ~o2 && (n2 = a % 4 ? 64 * n2 + o2 : o2, a++ % 4) ? c += String.fromCharCode(255 & n2 >> (-2 * a & 6)) : 0)
+      o2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=".indexOf(o2);
+    return c;
+  };
+  function t(e2) {
+    var t2 = e2.replace(/-/g, "+").replace(/_/g, "/");
+    switch (t2.length % 4) {
+      case 0:
+        break;
+      case 2:
+        t2 += "==";
+        break;
+      case 3:
+        t2 += "=";
+        break;
+      default:
+        throw "Illegal base64url string!";
+    }
+    try {
+      return function(e3) {
+        return decodeURIComponent(r(e3).replace(/(.)/g, function(e4, r2) {
+          var t3 = r2.charCodeAt(0).toString(16).toUpperCase();
+          return t3.length < 2 && (t3 = "0" + t3), "%" + t3;
+        }));
+      }(t2);
+    } catch (e3) {
+      return r(t2);
+    }
+  }
+  function n(e2) {
+    this.message = e2;
+  }
+  function o(e2, r2) {
+    if ("string" != typeof e2)
+      throw new n("Invalid token specified");
+    var o2 = true === (r2 = r2 || {}).header ? 0 : 1;
+    try {
+      return JSON.parse(t(e2.split(".")[o2]));
+    } catch (e3) {
+      throw new n("Invalid token specified: " + e3.message);
+    }
+  }
+  n.prototype = new Error(), n.prototype.name = "InvalidTokenError";
   const _sfc_main$a = {
     __name: "user_detail",
     setup(__props, { expose: __expose }) {
@@ -708,10 +764,10 @@ if (uni.restoreGlobal) {
     setup(__props, { expose: __expose }) {
       __expose();
       const cardData = vue.ref([
-        { title: "Total Revenue", value: "$75,000", icon: "/assets/icons/revenue.svg", details: "Total revenue generated this month" },
-        { title: "Orders Processed", value: 1850, icon: "/assets/icons/orders.svg", details: "Total orders processed this week" },
-        { title: "Active Users", value: 1320, icon: "/assets/icons/users.svg", details: "Users actively browsing your site" },
-        { title: "Customer Feedback", value: "4.9/5", icon: "/assets/icons/feedback.svg", details: "Customer satisfaction rating" }
+        { title: "Total Revenue", value: "$90,000", icon: "fas fa-chart-line", details: "Revenue growth over the past quarter" },
+        { title: "Orders Processed", value: 2200, icon: "fas fa-shipping-fast", details: "Orders shipped this week" },
+        { title: "Active Users", value: 1500, icon: "fas fa-users-cog", details: "Users managing their accounts" },
+        { title: "Customer Feedback", value: "4.8/5", icon: "fas fa-star", details: "Average customer satisfaction rating" }
       ]);
       const __returned__ = { cardData, ref: vue.ref };
       Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
@@ -729,10 +785,15 @@ if (uni.restoreGlobal) {
             key: index
           }, [
             vue.createElementVNode("view", { class: "card-header" }, [
-              vue.createElementVNode("image", {
-                class: "card-icon",
-                src: item.icon
-              }, null, 8, ["src"]),
+              vue.createElementVNode(
+                "i",
+                {
+                  class: vue.normalizeClass(["card-icon", item.icon])
+                },
+                null,
+                2
+                /* CLASS */
+              ),
               vue.createElementVNode(
                 "text",
                 { class: "card-title" },
@@ -768,116 +829,87 @@ if (uni.restoreGlobal) {
   }
   const Revenue = /* @__PURE__ */ _export_sfc(_sfc_main$7, [["render", _sfc_render$6], ["__scopeId", "data-v-5f0b319b"], ["__file", "C:/Users/shwethe/Desktop/Hbuilder/Electricity_meter/pages/Revenue/revenue.vue"]]);
   const _sfc_main$6 = {
-    __name: "feedback",
-    setup(__props, { expose: __expose }) {
-      __expose();
-      const post = vue.ref({
-        userAvatar: "/static/user1.jpg",
-        userName: "Salai Chai Naing",
-        timeAgo: "2 hours ago",
-        content: "Hello, this is my first post!",
-        likes: 25,
-        comments: 10,
-        commentsList: [
-          { author: "Alice", text: "Great post!" },
-          { author: "Bob", text: "Welcome to the app!" }
-        ]
-      });
-      const newComment = vue.ref("");
-      const likePost = (post2) => {
-        post2.likes++;
+    data() {
+      return {
+        activities: [
+          { time: "March 18, 2025 - 10:00 AM", description: "Liked a post" },
+          { time: "March 17, 2025 - 3:00 PM", description: "Updated profile picture." },
+          { time: "March 16, 2025 - 1:00 PM", description: "Commented on a technology blog post." }
+        ],
+        privacy: true,
+        notifications: false
       };
-      const commentPost = (post2) => {
-        formatAppLog("log", "at pages/Feedback/feedback.vue:55", "Commented on post:", post2);
-      };
-      const sharePost = (post2) => {
-        formatAppLog("log", "at pages/Feedback/feedback.vue:59", "Shared post:", post2);
-      };
-      const submitComment = () => {
-        post.value.commentsList.push({ author: "You", text: newComment.value });
-        newComment.value = "";
-      };
-      const __returned__ = { post, newComment, likePost, commentPost, sharePost, submitComment, ref: vue.ref };
-      Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
-      return __returned__;
+    },
+    methods: {
+      editProfile() {
+        formatAppLog("log", "at pages/Feedback/feedback.vue:58", "User clicked Edit Profile!");
+      },
+      logout() {
+        formatAppLog("log", "at pages/Feedback/feedback.vue:61", "Logging out...");
+        uni.removeStorageSync("token");
+        uni.removeStorageSync("userSession");
+        uni.showToast({
+          title: "Logout",
+          icon: "success"
+        });
+        uni.reLaunch({
+          url: "/pages/loginPage/login"
+        });
+      }
     }
   };
   function _sfc_render$5(_ctx, _cache, $props, $setup, $data, $options) {
-    return vue.openBlock(), vue.createElementBlock("view", { class: "post-details-container" }, [
-      vue.createElementVNode("view", { class: "post-header" }, [
+    return vue.openBlock(), vue.createElementBlock("view", { class: "profile-container" }, [
+      vue.createElementVNode("view", { class: "profile-header" }, [
         vue.createElementVNode("image", {
-          class: "user-avatar",
-          src: "https://shorturl.at/QuLrA",
-          alt: "User Avatar"
+          class: "profile-image",
+          src: "https://shorturl.at/cbQCd"
         }),
-        vue.createElementVNode("view", { class: "post-user" }, [
-          vue.createElementVNode(
-            "text",
-            { class: "user-name" },
-            vue.toDisplayString($setup.post.userName),
-            1
-            /* TEXT */
-          ),
-          vue.createElementVNode(
-            "text",
-            { class: "post-time" },
-            vue.toDisplayString($setup.post.timeAgo),
-            1
-            /* TEXT */
-          )
+        vue.createElementVNode("text", { class: "profile-name" }, "Salai Chai Naing"),
+        vue.createElementVNode("text", { class: "profile-job" }, "Software developer")
+      ]),
+      vue.createElementVNode("view", { class: "edit-profile-button" }, [
+        vue.createElementVNode("button", {
+          onClick: _cache[0] || (_cache[0] = (...args) => $options.editProfile && $options.editProfile(...args)),
+          class: "edit-btn"
+        }, "Edit Profile")
+      ]),
+      vue.createElementVNode("view", { class: "personal-info" }, [
+        vue.createElementVNode("text", { class: "section-title" }, "Personal Information"),
+        vue.createElementVNode("view", { class: "info-item" }, [
+          vue.createElementVNode("text", { class: "info-label" }, "Email"),
+          vue.createElementVNode("text", { class: "info-value" }, "salai@gmail.com")
+        ]),
+        vue.createElementVNode("view", { class: "info-item" }, [
+          vue.createElementVNode("text", { class: "info-label" }, "Phone"),
+          vue.createElementVNode("text", { class: "info-value" }, "+1 234 567 890")
+        ]),
+        vue.createElementVNode("view", { class: "info-item" }, [
+          vue.createElementVNode("text", { class: "info-label" }, "Location"),
+          vue.createElementVNode("text", { class: "info-value" }, "Myanmar Tachileik")
         ])
       ]),
-      vue.createElementVNode(
-        "text",
-        { class: "post-content" },
-        vue.toDisplayString($setup.post.content),
-        1
-        /* TEXT */
-      ),
-      vue.createElementVNode("view", { class: "post-actions" }, [
-        vue.createElementVNode(
-          "button",
-          {
-            onClick: _cache[0] || (_cache[0] = ($event) => $setup.likePost($setup.post))
-          },
-          "👍 " + vue.toDisplayString($setup.post.likes) + " Likes",
-          1
-          /* TEXT */
-        ),
-        vue.createElementVNode(
-          "button",
-          {
-            onClick: _cache[1] || (_cache[1] = ($event) => $setup.commentPost($setup.post))
-          },
-          "💬 " + vue.toDisplayString($setup.post.comments) + " Comments",
-          1
-          /* TEXT */
-        ),
-        vue.createElementVNode("button", {
-          onClick: _cache[2] || (_cache[2] = ($event) => $setup.sharePost($setup.post))
-        }, "🔗 Share")
-      ]),
-      vue.createElementVNode("view", { class: "comments-section" }, [
-        vue.createElementVNode("text", { class: "comments-title" }, "Comments"),
+      vue.createElementVNode("view", { class: "activity-feed" }, [
+        vue.createElementVNode("text", { class: "section-title" }, "Recent Activity"),
         (vue.openBlock(true), vue.createElementBlock(
           vue.Fragment,
           null,
-          vue.renderList($setup.post.commentsList, (comment, index) => {
+          vue.renderList($data.activities, (activity, index) => {
             return vue.openBlock(), vue.createElementBlock("view", {
-              key: index,
-              class: "comment"
+              class: "activity-item",
+              key: index
             }, [
               vue.createElementVNode(
                 "text",
-                { class: "comment-author" },
-                vue.toDisplayString(comment.author) + ":",
+                { class: "activity-time" },
+                vue.toDisplayString(activity.time),
                 1
                 /* TEXT */
               ),
               vue.createElementVNode(
                 "text",
-                { class: "comment-text" },
-                vue.toDisplayString(comment.text),
+                { class: "activity-description" },
+                vue.toDisplayString(activity.description),
                 1
                 /* TEXT */
               )
@@ -887,23 +919,12 @@ if (uni.restoreGlobal) {
           /* KEYED_FRAGMENT */
         ))
       ]),
-      vue.withDirectives(vue.createElementVNode(
-        "input",
-        {
-          "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => $setup.newComment = $event),
-          placeholder: "Add a comment...",
-          class: "comment-input"
-        },
-        null,
-        512
-        /* NEED_PATCH */
-      ), [
-        [vue.vModelText, $setup.newComment]
-      ]),
-      vue.createElementVNode("button", {
-        class: "comment-submit",
-        onClick: $setup.submitComment
-      }, "Post Comment")
+      vue.createElementVNode("view", { class: "logout-button" }, [
+        vue.createElementVNode("button", {
+          onClick: _cache[1] || (_cache[1] = (...args) => $options.logout && $options.logout(...args)),
+          class: "logout-btn"
+        }, "Logout")
+      ])
     ]);
   }
   const feedbackVue = /* @__PURE__ */ _export_sfc(_sfc_main$6, [["render", _sfc_render$5], ["__scopeId", "data-v-6167f87a"], ["__file", "C:/Users/shwethe/Desktop/Hbuilder/Electricity_meter/pages/Feedback/feedback.vue"]]);
@@ -939,6 +960,31 @@ if (uni.restoreGlobal) {
     setup(__props, { expose: __expose }) {
       __expose();
       const selectedTab = vue.ref("home");
+      const show_create = vue.ref(false);
+      vue.onMounted(() => {
+        const token = uni.getStorageSync("token");
+        if (token) {
+          try {
+            const decoded = o(token);
+            formatAppLog("log", "at pages/OverView/over_view.vue:80", "Decoded token:", decoded);
+            const userRole = decoded.role;
+            if (userRole) {
+              formatAppLog("log", "at pages/OverView/over_view.vue:84", "User Role:", userRole);
+              if (userRole === "admin") {
+                show_create.value = true;
+              } else {
+                show_create.value = false;
+              }
+            } else {
+              formatAppLog("log", "at pages/OverView/over_view.vue:92", "No role in the token");
+            }
+          } catch (error) {
+            formatAppLog("error", "at pages/OverView/over_view.vue:95", "Error decoding token", error);
+          }
+        } else {
+          formatAppLog("log", "at pages/OverView/over_view.vue:98", "No token found");
+        }
+      });
       const goToUserCreate = () => {
         uni.navigateTo({
           url: "/pages/index/index"
@@ -947,7 +993,9 @@ if (uni.restoreGlobal) {
       const selectTab = (tab) => {
         selectedTab.value = tab;
       };
-      const __returned__ = { selectedTab, goToUserCreate, selectTab, HomePage: PagesHomeFileHome, Revenue, feedbackVue, progressVue, createVue, ref: vue.ref };
+      const __returned__ = { selectedTab, show_create, goToUserCreate, selectTab, ref: vue.ref, onMounted: vue.onMounted, get jwt_decode() {
+        return o;
+      }, HomePage: PagesHomeFileHome, Revenue, feedbackVue, progressVue, createVue };
       Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
       return __returned__;
     }
@@ -964,16 +1012,17 @@ if (uni.restoreGlobal) {
         $setup.selectedTab === "products" ? (vue.openBlock(), vue.createElementBlock("view", { key: 2 }, [
           vue.createVNode($setup["progressVue"])
         ])) : vue.createCommentVNode("v-if", true),
-        $setup.selectedTab === "feedback" ? (vue.openBlock(), vue.createElementBlock("view", { key: 3 }, [
+        $setup.selectedTab === "logout" ? (vue.openBlock(), vue.createElementBlock("view", { key: 3 }, [
           vue.createVNode($setup["feedbackVue"])
         ])) : vue.createCommentVNode("v-if", true)
       ]),
-      vue.createElementVNode("view", {
+      $setup.show_create ? (vue.openBlock(), vue.createElementBlock("view", {
+        key: 0,
         onClick: $setup.goToUserCreate,
         class: "add_new"
       }, [
         vue.createVNode($setup["createVue"])
-      ]),
+      ])) : vue.createCommentVNode("v-if", true),
       vue.createElementVNode("view", { class: "footer" }, [
         vue.createElementVNode("view", { class: "footer-icons" }, [
           vue.createElementVNode(
@@ -1018,12 +1067,12 @@ if (uni.restoreGlobal) {
           vue.createElementVNode(
             "view",
             {
-              class: vue.normalizeClass(["footer-icon", { active: $setup.selectedTab === "feedback" }]),
-              onClick: _cache[3] || (_cache[3] = ($event) => $setup.selectTab("feedback"))
+              class: vue.normalizeClass(["footer-icon", { active: $setup.selectedTab === "logout" }]),
+              onClick: _cache[3] || (_cache[3] = ($event) => $setup.selectTab("logout"))
             },
             [
-              vue.createElementVNode("i", { class: "fa fa-comments" }),
-              vue.createElementVNode("text", null, "Feedback")
+              vue.createElementVNode("i", { class: "fa fa-car" }),
+              vue.createElementVNode("text", null, "Logout")
             ],
             2
             /* CLASS */
@@ -1370,16 +1419,14 @@ if (uni.restoreGlobal) {
         itemsToShow: 10,
         hasMoreItems: true,
         expandedUserId: null
-        // To track the currently expanded user's ID
       };
     },
     mounted() {
       this.fetchData();
     },
     computed: {
-      // Find the selected user from itemList based on expandedUserId
       selectedUser() {
-        formatAppLog("log", "at pages/userFile/user_file.vue:87", "Searching for user with ID:", this.expandedUserId);
+        formatAppLog("log", "at pages/userFile/user_file.vue:85", "Searching for user with ID:", this.expandedUserId);
         return this.itemList.find((item) => item._id === this.expandedUserId);
       }
     },
@@ -1387,7 +1434,6 @@ if (uni.restoreGlobal) {
       fetchData() {
         uni.request({
           url: "http://192.168.16.31:4000/api/eletricity_meter",
-          // url: 'http://localhost:4000/api/eletricity_meter',
           data: {
             text: "uni.request"
           },
@@ -1395,31 +1441,27 @@ if (uni.restoreGlobal) {
             "custom-header": "hello"
           },
           success: (res) => {
-            formatAppLog("log", "at pages/userFile/user_file.vue:103", "API Response:", res);
+            formatAppLog("log", "at pages/userFile/user_file.vue:100", "API Response:", res);
             if (res.statusCode === 200) {
               this.itemList = res.data;
-              this.itemList.forEach((item) => {
-                formatAppLog("log", "at pages/userFile/user_file.vue:109", "Item edit_price:", item.edit_price);
-              });
               this.displayedItems = this.itemList.slice(0, this.itemsToShow);
               if (this.itemList.length <= this.itemsToShow) {
                 this.hasMoreItems = false;
               }
             } else {
-              formatAppLog("error", "at pages/userFile/user_file.vue:117", "Fetch API failed", res.statusCode);
+              formatAppLog("error", "at pages/userFile/user_file.vue:108", "Fetch API failed", res.statusCode);
             }
           }
         });
       },
       goToDetailPage(itemId) {
-        formatAppLog("log", "at pages/userFile/user_file.vue:124", "Item clicked:", itemId);
+        formatAppLog("log", "at pages/userFile/user_file.vue:115", "Item clicked:", itemId);
         if (this.expandedUserId === itemId) {
           this.expandedUserId = null;
         } else {
           this.expandedUserId = itemId;
         }
       },
-      // Method to close the modal
       closeModal() {
         this.expandedUserId = null;
       },
@@ -1430,7 +1472,6 @@ if (uni.restoreGlobal) {
           this.hasMoreItems = false;
         }
       },
-      // Utility method to format price as a valid number
       formatPrice(price) {
         const numericPrice = parseFloat(price);
         return isNaN(numericPrice) ? "Invalid Price" : numericPrice.toFixed(2);
@@ -1452,7 +1493,6 @@ if (uni.restoreGlobal) {
               key: index,
               onClick: ($event) => $options.goToDetailPage(item._id)
             }, [
-              vue.createCommentVNode(' <i class="fas fa-tachometer-alt item-image" style="font-size: 50px; color: coral;"></i> '),
               vue.createElementVNode("image", {
                 class: "icon",
                 src: "https://shorturl.at/MlXfI",
@@ -1475,10 +1515,10 @@ if (uni.restoreGlobal) {
                 )
               ]),
               vue.createElementVNode("view", { style: { "padding": "5px" } }, [
-                vue.createElementVNode("h5", { style: { "font-size": "16px", "margin-bottom": "8px" } }, "Price"),
+                vue.createElementVNode("h5", { style: { "font-size": "14px", "margin-bottom": "8px" } }, "Price"),
                 vue.createElementVNode(
                   "span",
-                  { style: { "color": "#38b000", "font-weight": "bold" } },
+                  { style: { "color": "#38b000", "font-weight": "bold", "font-size": "14px" } },
                   vue.toDisplayString(item.edit_price) + " ฿",
                   1
                   /* TEXT */
@@ -1507,7 +1547,7 @@ if (uni.restoreGlobal) {
               vue.createElementVNode("span", { class: "modal-label" }, "User name:"),
               vue.createElementVNode(
                 "span",
-                { style: { "color": "blueviolet", "font-weight": "bolder" } },
+                { style: { "color": "blueviolet", "font-weight": "bolder", "font-size": "14px" } },
                 vue.toDisplayString($options.selectedUser ? $options.selectedUser.user_id : "N/A"),
                 1
                 /* TEXT */
@@ -1518,7 +1558,7 @@ if (uni.restoreGlobal) {
               vue.createElementVNode("span", { class: "modal-label" }, "Price:"),
               vue.createElementVNode(
                 "span",
-                { style: { "color": "green", "font-weight": "bold" } },
+                { style: { "color": "green", "font-weight": "bold", "font-size": "14px" } },
                 vue.toDisplayString($options.selectedUser ? $options.selectedUser.edit_price : "N/A") + " ฿ ",
                 1
                 /* TEXT */
@@ -1529,7 +1569,7 @@ if (uni.restoreGlobal) {
               vue.createElementVNode("span", { class: "modal-label" }, "Current meter:"),
               vue.createElementVNode(
                 "span",
-                { style: { "color": "green", "font-weight": "bold" } },
+                { style: { "color": "green", "font-weight": "bold", "font-size": "14px" } },
                 vue.toDisplayString($options.selectedUser ? $options.selectedUser.current_meter : "N/A") + " kW-h ",
                 1
                 /* TEXT */
@@ -1540,7 +1580,7 @@ if (uni.restoreGlobal) {
               vue.createElementVNode("span", { class: "modal-label" }, "Last reading:"),
               vue.createElementVNode(
                 "span",
-                { style: { "color": "orangered", "font-weight": "bold" } },
+                { style: { "color": "orangered", "font-weight": "bold", "font-size": "14px" } },
                 vue.toDisplayString($options.selectedUser ? $options.selectedUser.last_reading : "N/A") + " kW-h ",
                 1
                 /* TEXT */

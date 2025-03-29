@@ -11,7 +11,7 @@
     margin-bottom: 20px;
 }
 .title[data-v-1a15d095] {
-    font-size: 24px;
+    font-size: 18px; 
     font-weight: bold;
     color: #2c3e50;
 }
@@ -22,7 +22,7 @@
 }
 .list-item[data-v-1a15d095] {
     display: flex;
- justify-content: space-between;
+    justify-content: space-between;
     align-items: center;
     text-align: center;
     background-color: #ffffff;
@@ -51,12 +51,12 @@
     justify-content: center;
 }
 .item-title[data-v-1a15d095] {
-    font-size: 16px;
+    font-size: 14px; 
     font-weight: bold;
     color: #5aa9e6;
 }
 .item-description[data-v-1a15d095] {
-    font-size: 14px;
+    font-size: 12px;
     color: #7f8c8d;
     margin-top: 5px;
 }
@@ -110,53 +110,46 @@
 .close-btn[data-v-1a15d095]:hover {
     background-color: #c0392b;
 }
-.modal-label[data-v-1a15d095] {
-   margin: 2px;
-   padding: 2px;
-}
 .modal-item[data-v-1a15d095] {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      /* background-color: #f9f9f9; */
-      /* box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); */
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
 }
 .modal-icon[data-v-1a15d095] {
-      margin-right: 10px;
-      color: #3498db;
-      font-size: 18px;
-      width: 20px;
-      text-align: center;
+    margin-right: 10px;
+    color: #3498db;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
 }
 .modal-label[data-v-1a15d095] {
-      font-weight: bold;
-   color: #1b4965;
-      /* color: #333; */
-      width: 120px;
+    font-weight: bold;
+    color: #1b4965;
+    font-size: 14px;
 }
 .modal-title[data-v-1a15d095] {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      text-align: center;
-      color: #2c3e50;
+    font-size: 20px; 
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #2c3e50;
 }
 .modal-content[data-v-1a15d095] {
-      margin-bottom: 20px;
+    margin-bottom: 20px;
 }
 .close-btn[data-v-1a15d095] {
-      padding: 12px 20px;
-      font-size: 16px;
-      background-color: #3498db;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
 }
 .close-btn[data-v-1a15d095]:hover {
-      background-color: #2980b9;
+    background-color: #2980b9;
 }
- 
+

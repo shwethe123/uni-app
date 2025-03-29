@@ -52,9 +52,9 @@
       </view>
     </view>
     <span @click="show_login = !show_login" style="font-size: 12px;">
-      {{ show_login ? 'No account yet?' : 'Already have an account?' }}
+      {{ show_login ? "Don't have an account?" : 'Already have an account?' }}
       <span style="font-weight: bold; text-decoration: underline;">
-        {{ show_login ? 'create account' : 'Login account' }}
+        {{ show_login ? 'Sign up' : 'Login account' }}
       </span>
     </span>
   </view>
@@ -118,7 +118,7 @@ const login = () => {
       if (res.statusCode === 200 && res.data.msg === 'Login successful') {
 		  console.log('my token',res.data.token);
         if (res.data.token) {
-          uni.setStorageSync('my_token', res.data.token);
+          uni.setStorageSync('token', res.data.token);
           uni.showToast({
             title: 'အောင်မြင်စွာ ဝင်ရောက်နိုင်ပါပြီ!',
             icon: 'success',
@@ -170,14 +170,17 @@ const register = () => {
 	    withCredentials: true,
     success(res) {
       if (res.statusCode === 201 && res.data.msg === 'User created successfully') {
-        uni.showToast({
-          title: 'အကောင့်သစ်အောင်မြင်စွာဖွင့်နိုင်ပါပြီ!',
-          icon: 'success',
-        });
-		uni.reLaunch({
-		  url: '/pages/OverView/over_view',
-		});
-        show_login.value = true;
+		  if(res.data.token) {
+			  uni.setStorageSync('token', res.data.token);
+			  uni.showToast({
+			    title: 'အကောင့်သစ်အောင်မြင်စွာဖွင့်နိုင်ပါပြီ!',
+			    icon: 'success',
+			  });
+			  uni.reLaunch({
+			    url: '/pages/OverView/over_view',
+			  });
+			  show_login.value = true;
+		  }
       } else {
         uni.showToast({
           title: res.data.msg || 'အကောင့်သစ်ဖွင့်ရန် မအောင်မြင်ပါ',
@@ -201,6 +204,8 @@ onMounted(() => {
     uni.reLaunch({
       url: '/pages/OverView/over_view',
     });
+  } else {
+	  console.log('token keep failed')
   }
 });
 </script>

@@ -57,7 +57,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 
-const Data = ref([
+const Data = ref([  
   { title: 'Customer Rating', value: '4.7/5', icon: 'fa fa-star', details: 'Customer feedback rating on products' }
 ]);
 
@@ -115,7 +115,6 @@ onMounted(() => {
     }
   });
 });
-
 </script>
 
 <style scoped>
@@ -124,56 +123,56 @@ onMounted(() => {
 .card-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  padding: 10px;
+  gap: 15px;
+  padding: 8px;
 }
 
 .card {
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 10px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 15px;
+  padding: 20px;
   transition: transform 0.3s ease;
   position: relative;
 }
 
 .card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-8px);
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .card-icon {
-  font-size: 30px;
+  font-size: 24px;
   color: #3498db;
 }
 
 .card-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: bold;
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
 .card-body {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .card-value {
-  font-size: 24px;
+  font-size: 18px;
   font-weight: bold;
   color: #28a745;
 }
 
 .card-footer {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .card-detail {
-  font-size: 12px;
+  font-size: 10px;
   color: #555;
 }
 </style>

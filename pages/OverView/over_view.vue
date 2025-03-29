@@ -1,23 +1,24 @@
 <template>
   <view class="tabs-container">
-    
     <view class="tab-content">
       <view v-if="selectedTab === 'home'">
         <HomePage />
       </view>
       <view v-if="selectedTab === 'revenue'">
-        <Revenue/>
+        <Revenue />
       </view>
       <view v-if="selectedTab === 'products'">
-        <progressVue/>
+        <progressVue />
       </view>
-      <view v-if="selectedTab === 'feedback'">
-        <feedbackVue/>
+      <view v-if="selectedTab === 'logout'">
+        <feedbackVue />
       </view>
     </view>
-    <view @click="goToUserCreate" class="add_new">
-    	<createVue/>
+    
+    <view v-if="show_create" @click="goToUserCreate" class="add_new">
+      <createVue />
     </view>
+
     <view class="footer">
       <view class="footer-icons">
         <view
@@ -46,11 +47,11 @@
         </view>
         <view
           class="footer-icon"
-          :class="{ active: selectedTab === 'feedback' }"
-          @click="selectTab('feedback')"
+          :class="{ active: selectedTab === 'logout' }"
+          @click="selectTab('logout')"
         >
-          <i class="fa fa-comments"></i>
-          <text>Feedback</text>
+          <i class="fa fa-car"></i>
+          <text>Logout</text>
         </view>
       </view>
     </view>
@@ -58,14 +59,55 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
+import jwt_decode from 'jwt-decode' 
+
 import HomePage from '../HomeFile/home.vue'
 import Revenue from '../Revenue/revenue.vue'
 import feedbackVue from '../Feedback/feedback.vue'
 import progressVue from '../progress/progress.vue'
 import createVue from '../Create/create.vue'
-import { ref } from 'vue'
 
 const selectedTab = ref('home')
+const show_create = ref(false)
+
+const myToken = ref("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMzM0MzkiLCJkZXBhcnRtZW50X2lkIjoiMSIsImpvYl9pZCI6IjMiLCJmZW5fZGlhbl9pZCI6IjEiLCJleHAiOjE3NDI3MDM2NDV9.9ZBvXlaKAzBAFGhwEZe_jILJ67vdb872GO1pONB91aQ")
+
+onMounted(() => {
+  const token = uni.getStorageSync('token'); 
+
+  if (token) {
+    try {
+      const decoded = jwt_decode(token); 
+	  
+	  const myToken_decoded = jwt_decode(myToken.value);
+	  console.log('myToken_decoded', myToken_decoded);
+	  
+      console.log('Decoded token:', decoded);
+      
+      const userRole = decoded.role; 
+	  
+	  const main_user_id = myToken_decoded.user_id;
+      if (userRole) {
+        console.log('User Role:', userRole);
+
+        // if (userRole === "admin") {
+		if (main_user_id === 33439) {
+          show_create.value = true;
+        } else {
+          show_create.value = false;
+        }
+      } else {
+        console.log('No role in the token');
+      }
+    } catch (error) {
+      console.error('Error decoding token', error);
+    }
+  } else {
+    console.log('No token found');
+  }
+});
+
 
 const goToUserCreate = () => {
   uni.navigateTo({
@@ -82,7 +124,7 @@ const selectTab = (tab) => {
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
 
 .tab-content {
-  font-size: 18px;
+  font-size: 14px;
   color: #333;
 }
 
@@ -94,7 +136,7 @@ const selectTab = (tab) => {
   background-color: #f7f7f7;
   border-top-left-radius: 30px;
   border-top-right-radius: 30px;
-  padding: 10px 0;
+  padding: 8px 0;
   display: flex;
   justify-content: center;
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
@@ -104,22 +146,22 @@ const selectTab = (tab) => {
 .footer-icons {
   display: flex;
   justify-content: space-between;
-  width: 90%;
+  width: 85%;
 }
 
 .footer-icon {
   text-align: center;
   color: #7f8c8d;
-  font-size: 14px;
-  padding: 10px;
+  font-size: 12px;
+  padding: 12px;
   border-radius: 25px;
   background-color: #ecf0f1;
   transition: background-color 0.3s ease, transform 0.3s ease, color 0.3s ease;
 }
 
 .footer-icon i {
-  font-size: 20px;
-  margin-bottom: 5px;
+  font-size: 16px;
+  margin-bottom: 4px;
   display: block;
 }
 

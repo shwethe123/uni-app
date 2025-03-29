@@ -247,117 +247,124 @@ const get_user_location = () => {
 </script>
 
 <style scoped>
-  .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 30rpx; 
-    height: 100%;
-    background-color: #f8f9fa; 
-  }
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 30rpx; 
+  height: 100%;
+  background-color: #f8f9fa; 
+}
 
-  .header {
-    margin-top: 20px;
-    margin-bottom: 40px;
-    background-color: #3498db;
-    color: white;
-    padding: 15px 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-  }
+.header {
+  margin-top: 20px;
+  margin-bottom: 40px;
+  background-color: #3498db;
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+}
 
-  .input-area {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 40rpx; 
-    width: 90%;
-	margin-right: 22px;
-  }
+.input-area {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40rpx; 
+  width: 90%;
+  margin-right: 22px;
+}
 
-  .label {
-    font-size: 32rpx;
-    font-weight: 600; 
-    color: #555; 
-    margin-bottom: 10rpx;
-    margin-left: 10px;
-  }
+.label {
+  font-size: 32rpx;
+  font-weight: 600; 
+  color: #555; 
+  margin-bottom: 10rpx;
+  margin-left: 10px;
+}
 
-  .input-box,
-  .picker-box {
-    width: 100%;
-    padding: 25rpx; 
-    padding-right: 10px;
-    border-radius: 12rpx; 
-    background-color: white;
-    border: 1px solid white; 
-    font-size: 32rpx; 
-    transition: 0.3s ease-in-out;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
-  }
+.input-box,
+.picker-box {
+  width: 100%;
+  padding: 25rpx; 
+  padding-right: 10px;
+  border-radius: 12rpx; 
+  background-color: white;
+  border: 1px solid white; 
+  font-size: 32rpx; 
+  transition: 0.3s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
+}
 
-  .input-box:focus,
-  .picker-box:focus {
-    border-color: #3498db;
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
-    outline: none;
-  }
+.input-box:focus,
+.picker-box:focus {
+  border-color: #3498db;
+  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
+  outline: none;
+}
 
-  .input-box:hover,
-  .picker-box:hover {
-    background-color: white;
-    border-color: #3498db;
-  }
+.input-box:hover,
+.picker-box:hover {
+  background-color: white;
+  border-color: #3498db;
+}
 
-  .error-message {
-    color: #e74c3c;
-    font-size: 28rpx;
-    margin-top: 8rpx;
-    font-weight: 500;
-  }
+.input-box::placeholder,
+.picker-box::placeholder {
+  font-size: 14rpx; 
+  color: #aaa;
+}
 
-  .button-area {
-    margin-top: 50rpx;
-    width: 90%;
-  }
+.error-message {
+  color: #e74c3c;
+  font-size: 28rpx;
+  margin-top: 8rpx;
+  font-weight: 500;
+}
 
-  .submit-btn {
-    padding: 20rpx 30rpx;
-    background: #3498db;
-    color: white;
-    font-size: 34rpx;
-    border: none;
-    border-radius: 10rpx;
-    width: 100%;
-    box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.15);
-    transition: background-color 0.3s, box-shadow 0.3s;
-  }
+.button-area {
+  margin-top: 50rpx;
+  width: 90%;
+}
 
-  .submit-btn:hover {
-    background: #2980b9;
-    box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.2);
-  }
+.submit-btn {
+  padding: 20rpx 30rpx;
+  background: #3498db;
+  color: white;
+  font-size: 34rpx;
+  border: none;
+  border-radius: 10rpx;
+  width: 100%;
+  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.15);
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
 
-  .picker-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+.submit-btn:hover {
+  background: #2980b9;
+  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.2);
+}
 
-  .arrow {
-    width: 0;
-    height: 0;
-    margin-right: 20px;
-    border-left: 8rpx solid transparent;
-    border-right: 8rpx solid transparent;
-    border-top: 10rpx solid #666;
-  }
-  
-  .switch-button {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 20rpx;
-    width: 90%;
-  }
+.picker-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.arrow {
+  width: 0;
+  height: 0;
+  margin-right: 20px;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-top: 10rpx solid #666;
+}
+
+.switch-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20rpx;
+  width: 90%;
+}
+
 </style>

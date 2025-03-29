@@ -25,7 +25,6 @@ const dashboardData = ref([
   { title: "Total Revenue", data: "$4500", icon: "fa fa-dollar-sign", progress: 0, maxProgress: 100 },
 ]);
 
-
 const updateProgressBasedOnTime = () => {
   const intervalTime = 1000;
   
@@ -35,7 +34,6 @@ const updateProgressBasedOnTime = () => {
     const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
     
     dashboardData.value.forEach(item => {
-
       if (item.progress < item.maxProgress) {
         item.progress = Math.min((elapsedSeconds / 60) * 100, item.maxProgress);
       }
@@ -52,26 +50,26 @@ onMounted(() => {
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
 
 .dashboard {
-  padding: 10px;
+  padding: 8px;
 }
 
 .overview-box {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 15px;
 }
 
 .card {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  padding: 15px;
+  padding: 20px;
   transition: transform 0.3s ease-in-out;
   position: relative;
 }
 
 .card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-8px);
 }
 
 .card-header {
@@ -81,32 +79,32 @@ onMounted(() => {
 }
 
 .card-icon {
-  font-size: 30px;
+  font-size: 24px;
   color: #3498db;
 }
 
 .card-title {
-  font-size: 16px;
+  font-size: 14px; 
   font-weight: bold;
   color: #333;
 }
 
 .card-body {
-  margin-top: 15px;
+  margin-top: 12px;
 }
 
 .card-data {
-  font-size: 24px;
+  font-size: 18px; 
   font-weight: bold;
   color: #4caf50;
 }
 
 .progress-bar {
-  height: 6px;
+  height: 5px;
   width: 100%;
   background-color: #f0f0f0;
   border-radius: 3px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .progress {
