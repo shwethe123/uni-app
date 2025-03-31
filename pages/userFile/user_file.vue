@@ -67,52 +67,35 @@
 </template>
 
 <script>
+import electricityMeterApi from '../api_store/electricity_meter';
+
 export default {
   data() {
     return {
-      itemList: [],
       displayedItems: [],
       itemsToShow: 10,
       hasMoreItems: true,
       expandedUserId: null,
     };
   },
-  mounted() {
-    this.fetchData();
-  },
   computed: {
     selectedUser() {
-      console.log('Searching for user with ID:', this.expandedUserId);
-      return this.itemList.find(item => item._id === this.expandedUserId); // Use _id for matching
+      return this.itemList.find(item => item._id === this.expandedUserId);
     }
   },
   methods: {
-    fetchData() {
-      uni.request({
-        url: 'http://192.168.16.31:4000/api/eletricity_meter',
-        data: {
-          text: 'uni.request'
-        },
-        header: {
-          'custom-header': 'hello'
-        },
-        success: (res) => {
-          console.log('API Response:', res); 
-          if (res.statusCode === 200) {
-            this.itemList = res.data;
-            this.displayedItems = this.itemList.slice(0, this.itemsToShow);
-            if (this.itemList.length <= this.itemsToShow) {
-              this.hasMoreItems = false;
-            }
-          } else {
-            console.error("Fetch API failed", res.statusCode);
-          }
-        }
-      });
+    async fetchData() {
+      const { meter_data, load } = electricityMeterApi();
+      await load();
+
+      this.itemList = meter_data.value;
+      this.displayedItems = this.itemList.slice(0, this.itemsToShow);
+      if (this.itemList.length <= this.itemsToShow) {
+        this.hasMoreItems = false;
+      }
     },
 
     goToDetailPage(itemId) {
-      console.log('Item clicked:', itemId);
       if (this.expandedUserId === itemId) { 
         this.expandedUserId = null; 
       } else {
@@ -138,6 +121,9 @@ export default {
       return isNaN(numericPrice) ? 'Invalid Price' : numericPrice.toFixed(2);
     }
   },
+  mounted() {
+    this.fetchData();
+  }
 };
 </script>
 
@@ -269,7 +255,10 @@ export default {
   .close-btn:hover {
     background-color: #c0392b;
   }
-
+  .modal-label {
+   margin: 2px;
+   padding: 2px;
+  }
   .modal-item {
     display: flex;
     align-items: center;

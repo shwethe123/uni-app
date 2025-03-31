@@ -3,7 +3,7 @@
 <!--    <view class="fab" @click="openSettings">
       <text class="fab-icon">⚙️</text>
     </view> -->
-    <view class="fab" @click="addItem">
+    <view class="fab">
       <text class="fab-icon">+</text>
     </view>
   </view>
@@ -14,9 +14,9 @@ const openSettings = () => {
   uni.navigateTo({ url: '/pages/settings/settings' })
 }
 
-const addItem = () => {
-  uni.navigateTo({ url: '/pages/add-item/add-item' })
-}
+// const addItem = () => {
+//   uni.navigateTo({ url: '/pages/add-item/add-item' })
+// }
 </script>
 
 <style scoped>

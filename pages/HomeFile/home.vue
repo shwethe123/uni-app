@@ -49,6 +49,7 @@
 <script>
 import DataShow from '../user_detail/user_detail.vue';
 import ProgressVue from '../progress/progress.vue';
+import electricityMeterApi from '../api_store/electricity_meter';
 
 export default {
   components: {
@@ -66,25 +67,34 @@ export default {
     this.fetchData();
   },
   methods: {
-    fetchData() {
-      uni.request({
-        url: 'http://192.168.16.31:4000/api/eletricity_meter',
-        data: { text: 'uni.request' },
-        header: { 'custom-header': 'hello' },
-        success: (res) => {
-          console.log(res);
-          if (res.statusCode === 200) {
-            this.itemList = res.data; 
-            this.updateVisibleItems();
-          } else {
-            console.error("Fetch API Failed", res.statusCode);
-          }
-        },
-        fail: (err) => {
-          console.error("Request Failed", err);
-        }
-      });
-    },
+    // fetchData() {
+    //   uni.request({
+    //     url: 'http://192.168.16.31:4000/api/eletricity_meter',
+    //     data: { text: 'uni.request' },
+    //     header: { 'custom-header': 'hello' },
+    //     success: (res) => {
+    //       console.log(res);
+    //       if (res.statusCode === 200) {
+    //         this.itemList = res.data; 
+    //         this.updateVisibleItems();
+    //       } else {
+    //         console.error("Fetch API Failed", res.statusCode);
+    //       }
+    //     },
+    //     fail: (err) => {
+    //       console.error("Request Failed", err);
+    //     }
+    //   });
+    // },
+	
+	async fetchData() {
+		const { meter_data, load } = electricityMeterApi();
+		await load();
+		
+		this.itemList = meter_data.value;
+		this.updateVisibleItems();
+	},
+	
     updateVisibleItems() {
       this.visibleItems = this.itemList.slice(0, this.itemsToShow);
     },

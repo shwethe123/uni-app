@@ -1,370 +1,193 @@
 <template>
-  <view class="content">
-    <view class="header">
-      <h5>လျှပ်စစ်မီး မီတာအချက်များအလက်ထည့်ရန်</h5>
+  <view class="tabs-container">
+    <view class="tab-content">
+      <view v-if="selectedTab === 'home'">
+        <HomePage />
+      </view>
+      <view v-if="selectedTab === 'revenue'">
+        <Revenue />
+      </view>
+      <view v-if="selectedTab === 'products'">
+        <progressVue />
+      </view>
+      <view v-if="selectedTab === 'logout'">
+        <feedbackVue />
+      </view>
     </view>
-	
-    <view class="input-area">
-      <text class="label">Select user_id:</text>
-      <picker :range="options" @change="onSelect_user">
-        <view class="picker-box">
-          <text>{{ user_id || 'ရွေးချယ်ရန်' }}</text>
-          <view class="arrow"></view>
+			
+    <view v-if="show_create" @click="goToUserCreate" class="add_new">
+      <createVue />
+    </view>
+
+    <view class="footer">
+      <view class="footer-icons">
+        <view
+          class="footer-icon"
+          :class="{ active: selectedTab === 'home' }"
+          @click="selectTab('home')"
+        >
+          <i class="fa fa-home"></i>
+          <text>Home</text>
         </view>
-      </picker>
-      <text class="error-message" v-if="errorMessages.user_id">{{ errorMessages.user_id }}</text>
-    </view>
-    
-    <view class="input-area">
-      <text class="label">Select user_location:</text>
-      <picker :range="user_location_list.map(location => location.user_location)" @change="onSelectChange">
-        <view class="picker-box">
-          <text v-if="loading">Loading...</text>
-          <text v-else>{{ selectedUserLocation || 'ရွေးချယ်ရန်' }}</text>
-          <view class="arrow"></view>
+        <view
+          class="footer-icon"
+          :class="{ active: selectedTab === 'revenue' }"
+          @click="selectTab('revenue')"
+        >
+          <i class="fa fa-dollar-sign"></i>
+          <text>Revenue</text>
         </view>
-      </picker>
-      <text class="error-message" v-if="errorMessages.user_location">{{ errorMessages.user_location }}</text>
-    </view>
-
-    <view class="input-area">
-      <text class="label">Current Price:</text>
-      <input class="input-box" type="number" placeholder="Enter price" v-model="price" />
-      <text class="error-message" v-if="errorMessages.price">{{ errorMessages.price }}</text>
-    </view>
-
-    <view class="input-area">
-      <text class="label">Current Meter:</text>
-      <input class="input-box" type="number" placeholder="Enter current meter" @input="onInputChange" v-model="current_meter" />
-      <text class="error-message" v-if="errorMessages.current_meter">{{ errorMessages.current_meter }}</text>
-    </view>
-
-    <view class="switch-button">
-      <text style="font-weight: bold; color: #3a6ea5;">မီး Meter စသုံးသူလာ ?</text>
-      <switch :checked="showLastReading" @change="onSwitchChange" />
-    </view>
-
-    <view class="input-area" v-if="showLastReading">
-      <text class="label">Last Reading:</text>
-      <input class="input-box" type="number" placeholder="Enter last reading" @input="onInputChange" v-model="last_reading" />
-      <text class="error-message" v-if="errorMessages.last_reading">{{ errorMessages.last_reading }}</text>
-    </view>
-
-    <view class="button-area">
-      <button class="submit-btn" @click="onSubmit">Submit</button>
+        <view
+          class="footer-icon"
+          :class="{ active: selectedTab === 'products' }"
+          @click="selectTab('products')"
+        >
+          <i class="fa fa-box"></i>
+          <text>Products</text>
+        </view>
+        <view
+          class="footer-icon"
+          :class="{ active: selectedTab === 'logout' }"
+          @click="selectTab('logout')"
+        >
+          <i class="fa fa-car"></i>
+          <text>Logout</text>
+        </view>
+      </view>
     </view>
   </view>
 </template>
 
-<script>
-import { ref, reactive, watch, onMounted } from 'vue';
+<script setup>
+import { ref, onMounted } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
+import jwt_decode from 'jwt-decode' 
 
-export default {
-  setup() {
-    const options = ref(['AG187', 'AG111', 'AL02']);
-    const user_id = ref('');
-    const user_location_list = ref([]); // Fetched locations
-    const selectedUserLocation = ref('');
-    const price = ref('');
-    const current_meter = ref('');
-    const last_reading = ref(0);
-    const showLastReading = ref(false);
-    const loading = ref(true);
-    const errorMessages = reactive({
-      user_id: '',
-      user_location: '',
-      price: '',
-      current_meter: '',
-      last_reading: '',
-    });
+import HomePage from '../HomeFile/home.vue'
+import Revenue from '../Revenue/revenue.vue'
+import feedbackVue from '../Feedback/feedback.vue'
+import progressVue from '../progress/progress.vue'
+import createVue from '../Create/create.vue'
+import get_user_id from '../api_store/user_id' 
 
-    const onSelect_user = (event) => {
-      user_id.value = options.value[event.detail.value];
-      errorMessages.user_id = '';
-    };
+const selectedTab = ref('home')
+const show_create = ref(false)
+const user_data = ref([]);
+const error = ref('');
 
-    const onSelectChange = (event) => {
-      const selectedIndex = event.detail.value;
-      selectedUserLocation.value = user_location_list.value[selectedIndex].user_location_id;
-      errorMessages.user_location = '';
-    };
+const myToken = ref("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMzM0MzkiLCJkZXBhcnRtZW50X2lkIjoiMSIsImpvYl9pZCI6IjMiLCJmZW5fZGlhbl9pZCI6IjEiLCJleHAiOjE3NDI3MDM2NDV9.9ZBvXlaKAzBAFGhwEZe_jILJ67vdb872GO1pONB91vQ")
 
-    const onInputChange = (event) => {
-      const { value, placeholder } = event.target;
-      if (placeholder === 'Enter price') {
-        price.value = value;
-      } else if (placeholder === 'Enter current meter') {
-        current_meter.value = value;
-      } else if (placeholder === 'Enter last reading') {
-        last_reading.value = value;
-      }
-      clearInputError(placeholder);
-    };
+onLoad((options) => {
+  console.log("myOptions", options)
+})
 
-    const clearInputError = (placeholder) => {
-      if (placeholder === 'Enter price') {
-        errorMessages.price = '';
-      } else if (placeholder === 'Enter current meter') {
-        errorMessages.current_meter = '';
-      } else if (placeholder === 'Enter last reading') {
-        errorMessages.last_reading = '';
-      }
-    };
+onMounted(async () => {
+  const { user_data, load } = get_user_id(); 
+  await load(); 
 
-const get_user_location = () => {
-  uni.request({
-    url: 'http://192.168.16.31:4000/api/user_location',
-    method: 'GET',
-    success(res) {
-      if (res.statusCode === 200) {
-        user_location_list.value = res.data;
-      } else {
-        console.log('Error response status:', res.statusCode);
-      }
-    },
-    fail(err) {
-      console.error('Request failed with error:', err);
-      uni.showToast({
-        title: 'Network request failed. Please check your connection.',
-        icon: 'none',
-      });
-    },
-    complete() {
-      loading.value = false;
-    }
-  });
-};
+  // console.log("Fetched user data:", user_data.value);
 
+  if (Array.isArray(user_data.value)) {
+    const user_ids = user_data.value.map(user => user.user_id);
+    console.log("User IDs:", user_ids);
 
-    const onSwitchChange = (event) => {
-      showLastReading.value = event.detail.value;
-    };
+    const token = uni.getStorageSync('token'); 
 
-    const validateForm = () => {
-      let isValid = true;
-      errorMessages.user_id = '';
-      errorMessages.user_location = '';
-      errorMessages.price = '';
-      errorMessages.current_meter = '';
-      errorMessages.last_reading = '';
+    if (token) {
+      try {
+        const decoded = jwt_decode(token); 
+        const myToken_decoded = jwt_decode(myToken.value);
+        
+        const userRole = decoded.role; 
+        const main_user_id = myToken_decoded.user_id;
 
-      if (!user_id.value) {
-        errorMessages.user_id = 'Please select an option.';
-        isValid = false;
-      }
-
-      if (!selectedUserLocation.value) {
-        errorMessages.user_location = 'Please select an option.';
-        isValid = false;
-      }
-
-      if (!price.value) {
-        errorMessages.price = 'Price is required.';
-        isValid = false;
-      }
-
-      if (!current_meter.value) {
-        errorMessages.current_meter = 'Current meter is required.';
-        isValid = false;
-      }
-
-      if (showLastReading.value && !last_reading.value) {
-        errorMessages.last_reading = 'Last reading is required.';
-        isValid = false;
-      }
-
-      return isValid;
-    };
-
-    const onSubmit = async () => {
-      if (validateForm()) {
-        try {
-          const response = await uni.request({
-            url: 'http://192.168.16.31:4000/api/eletricity_meter',
-            method: 'POST',
-            data: {
-              user_id: user_id.value,
-              user_location: selectedUserLocation.value,
-              price: price.value,
-              current_meter: current_meter.value,
-              last_reading: last_reading.value,
-            },
-          });
-
-          if (response.statusCode === 201) {
-            uni.showToast({
-              title: 'Form submitted successfully!',
-              icon: 'success',
-            });
-            uni.reLaunch({
-              url: '/pages/OverView/over_view',
-            });
+        if (userRole) {
+          console.log('Decoded user role:', userRole);
+          
+          if (user_ids.includes(main_user_id)) {
+            show_create.value = true;
           } else {
-            console.log('Unexpected response status:', response.statusCode);
-            throw new Error(`Failed to submit. Status code: ${response.statusCode}`);
+            show_create.value = false;
           }
-        } catch (error) {
-          console.error('Error submitting form:', error);
-          uni.showToast({
-            title: 'Submission failed. Please try again.',
-            icon: 'none',
-          });
+        } else {
+          console.log('No role in the token');
         }
-      } else {
-        console.log('Form contains errors.');
+      } catch (error) {
+        console.error('Error decoding token', error);
       }
-    };
+    } else {
+      console.log('No token found');
+    }
+  } else {
+    console.error('user_data is not an array or is empty');
+  }
+});
 
-    watch(showLastReading, (newValue) => {
-      if (!newValue) {
-        last_reading.value = 0;
-      }
-    });
+const goToUserCreate = () => {
+  uni.navigateTo({
+    url: '/pages/index/index'
+  })
+}
 
-    onMounted(() => {
-      get_user_location();
-    });
-
-    return {
-      user_id,
-      options,
-      loading,
-      user_location_list,
-      selectedUserLocation,
-      price,
-      current_meter,
-      last_reading,
-      showLastReading,
-      errorMessages,
-	  onSelect_user,
-      onSelectChange,
-      onInputChange,
-      onSwitchChange,
-      onSubmit,
-    };
-  },
-};
+const selectTab = (tab) => {
+  selectedTab.value = tab
+}
 </script>
 
 <style scoped>
-.content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 30rpx; 
-  height: 100%;
-  background-color: #f8f9fa; 
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
+
+.tab-content {
+  font-size: 14px;
+  color: #333;
 }
 
-.header {
-  margin-top: 20px;
-  margin-bottom: 40px;
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #f7f7f7;
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  padding: 8px 0;
+  display: flex;
+  justify-content: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+}
+
+.footer-icons {
+  display: flex;
+  justify-content: space-between;
+  width: 85%;
+}
+
+.footer-icon {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 12px;
+  padding: 12px;
+  border-radius: 25px;
+  background-color: #ecf0f1;
+  transition: background-color 0.3s ease, transform 0.3s ease, color 0.3s ease;
+}
+
+.footer-icon i {
+  font-size: 16px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.footer-icon:hover {
+  background-color: #e74c3c;
+  color: white;
+  transform: scale(1.1);
+}
+
+.footer-icon.active {
   background-color: #3498db;
   color: white;
-  padding: 15px 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  font-weight: bold;
 }
-
-.input-area {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 40rpx; 
-  width: 90%;
-  margin-right: 22px;
-}
-
-.label {
-  font-size: 32rpx;
-  font-weight: 600; 
-  color: #555; 
-  margin-bottom: 10rpx;
-  margin-left: 10px;
-}
-
-.input-box,
-.picker-box {
-  width: 100%;
-  padding: 25rpx; 
-  padding-right: 10px;
-  border-radius: 12rpx; 
-  background-color: white;
-  border: 1px solid white; 
-  font-size: 32rpx; 
-  transition: 0.3s ease-in-out;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); 
-}
-
-.input-box:focus,
-.picker-box:focus {
-  border-color: #3498db;
-  box-shadow: 0 4px 8px rgba(52, 152, 219, 0.2);
-  outline: none;
-}
-
-.input-box:hover,
-.picker-box:hover {
-  background-color: white;
-  border-color: #3498db;
-}
-
-.input-box::placeholder,
-.picker-box::placeholder {
-  font-size: 14rpx; 
-  color: #aaa;
-}
-
-.error-message {
-  color: #e74c3c;
-  font-size: 28rpx;
-  margin-top: 8rpx;
-  font-weight: 500;
-}
-
-.button-area {
-  margin-top: 50rpx;
-  width: 90%;
-}
-
-.submit-btn {
-  padding: 20rpx 30rpx;
-  background: #3498db;
-  color: white;
-  font-size: 34rpx;
-  border: none;
-  border-radius: 10rpx;
-  width: 100%;
-  box-shadow: 0 6rpx 12rpx rgba(0, 0, 0, 0.15);
-  transition: background-color 0.3s, box-shadow 0.3s;
-}
-
-.submit-btn:hover {
-  background: #2980b9;
-  box-shadow: 0 8rpx 16rpx rgba(0, 0, 0, 0.2);
-}
-
-.picker-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.arrow {
-  width: 0;
-  height: 0;
-  margin-right: 20px;
-  border-left: 8rpx solid transparent;
-  border-right: 8rpx solid transparent;
-  border-top: 10rpx solid #666;
-}
-
-.switch-button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 20rpx;
-  width: 90%;
-}
-
 </style>

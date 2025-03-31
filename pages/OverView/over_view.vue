@@ -14,7 +14,7 @@
         <feedbackVue />
       </view>
     </view>
-    
+			
     <view v-if="show_create" @click="goToUserCreate" class="add_new">
       <createVue />
     </view>
@@ -60,6 +60,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import jwt_decode from 'jwt-decode' 
 
 import HomePage from '../HomeFile/home.vue'
@@ -67,32 +68,51 @@ import Revenue from '../Revenue/revenue.vue'
 import feedbackVue from '../Feedback/feedback.vue'
 import progressVue from '../progress/progress.vue'
 import createVue from '../Create/create.vue'
+import get_user_id from '../api_store/user_id' 
 
 const selectedTab = ref('home')
 const show_create = ref(false)
+const user_data = ref([]);
+const error = ref('');
 
 const myToken = ref("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMzM0MzkiLCJkZXBhcnRtZW50X2lkIjoiMSIsImpvYl9pZCI6IjMiLCJmZW5fZGlhbl9pZCI6IjEiLCJleHAiOjE3NDI3MDM2NDV9.9ZBvXlaKAzBAFGhwEZe_jILJ67vdb872GO1pONB91aQ")
 
-onMounted(() => {
+onLoad((options) => {
+	console.log(options)
+  // 获取并转换参数
+ 
+})
+
+
+onMounted(async () => {
+  const { user_data, load } = get_user_id(); 
+  
+  await load(); 
+  
+  
+  
+  
+  console.log("Fetched user data:", user_data.value);
+  
+  
+
   const token = uni.getStorageSync('token'); 
 
   if (token) {
     try {
       const decoded = jwt_decode(token); 
-	  
-	  const myToken_decoded = jwt_decode(myToken.value);
-	  console.log('myToken_decoded', myToken_decoded);
-	  
+      
+      const myToken_decoded = jwt_decode(myToken.value);
+      console.log('myToken_decoded', myToken_decoded);
+      
       console.log('Decoded token:', decoded);
       
       const userRole = decoded.role; 
-	  
-	  const main_user_id = myToken_decoded.user_id;
+      const main_user_id = myToken_decoded.user_id;
+
       if (userRole) {
         console.log('User Role:', userRole);
-
-        // if (userRole === "admin") {
-		if (main_user_id === 33439) {
+        if (userRole === "admin") {
           show_create.value = true;
         } else {
           show_create.value = false;
@@ -108,7 +128,6 @@ onMounted(() => {
   }
 });
 
-
 const goToUserCreate = () => {
   uni.navigateTo({
     url: '/pages/index/index'
@@ -119,6 +138,7 @@ const selectTab = (tab) => {
   selectedTab.value = tab
 }
 </script>
+
 
 <style scoped>
 @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css');
